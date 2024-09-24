@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Feedback System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #toggleRoleBtn {
+            margin-top: 20px;
+            background-color: #28a745;
+        }
+        #toggleRoleBtn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <input type="hidden" id="role" value="student">
+            <button type="submit">Login</button>
+        </form>
+        <button id="toggleRoleBtn">Login as Admin</button>
+    </div>
+
+    <script>
+        let isAdmin = false; // Tracks if the current login is for admin
+
+        // Handle form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, role })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                if (role === 'student') {
+                    window.location.href = '/feedback.html';
+                } else if (role === 'teacher') {
+                    window.location.href = '/view_feedback.html';
+                }
+            } else {
+                alert(data.message || 'Login failed');
+            }
+        });
+
+        // Toggle between student and admin login
+        document.getElementById('toggleRoleBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            isAdmin = !isAdmin; // Toggle between admin and student
+
+            if (isAdmin) {
+                // Switch to admin login
+                document.getElementById('role').value = 'teacher';
+                document.getElementById('username').placeholder = 'Email';  // Change input placeholder to "Email"
+                document.getElementById('username').value = '';  // Clear the input field
+                document.getElementById('toggleRoleBtn').textContent = 'Login as Student';  // Update button text
+            } else {
+                // Switch back to student login
+                document.getElementById('role').value = 'student';
+                document.getElementById('username').placeholder = 'Username';  // Change input placeholder to "Username"
+                document.getElementById('username').value = '';  // Clear the input field
+                document.getElementById('toggleRoleBtn').textContent = 'Login as Admin';  // Update button text
+            }
+        });
+    </script>
+</body>
+</html>

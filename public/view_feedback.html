@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Feedback</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="feedback-view-container">
+        <h1>Your Feedback</h1>
+        <table id="feedbackTable">
+            <tr>
+                <th>Feedback</th>
+                <th>Date</th>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        // Retrieve the logged-in teacher's ID from the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const teacherId = urlParams.get('id'); // Assuming the ID is passed as a query parameter (e.g., ?id=1)
+
+        window.onload = async function() {
+            try {
+                const response = await fetch(`/view-feedback/${teacherId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch feedback');
+                }
+
+                const feedbackList = await response.json();
+                const feedbackTable = document.getElementById('feedbackTable');
+
+                if (feedbackList.length > 0) {
+                    feedbackList.forEach(feedback => {
+                        const row = feedbackTable.insertRow();
+                        const feedbackCell = row.insertCell(0);
+                        const dateCell = row.insertCell(1);
+
+                        feedbackCell.textContent = feedback.feedback_text;
+                        dateCell.textContent = new Date(feedback.created_at).toLocaleString();
+                    });
+                } else {
+                    const row = feedbackTable.insertRow();
+                    const cell = row.insertCell(0);
+                    cell.colSpan = 2;
+                    cell.textContent = 'No feedback available.';
+                    cell.style.textAlign = 'center'; // Center align the message
+                }
+            } catch (error) {
+                console.error('Error fetching feedback:', error);
+                const feedbackTable = document.getElementById('feedbackTable');
+                const row = feedbackTable.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 2;
+                cell.textContent = 'Error fetching feedback. Please try again later.';
+                cell.style.textAlign = 'center'; // Center align the error message
+            }
+        };
+    </script>
+</body>
+</html>

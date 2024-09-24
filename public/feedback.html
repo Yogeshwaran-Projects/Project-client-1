@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Feedback</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        .feedback-container {
+            max-width: 400px;
+            margin: auto;
+        }
+        select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="feedback-container">
+        <h1>Submit Feedback</h1>
+        <form id="feedbackForm">
+            <!-- Teacher Selection Dropdown -->
+            <select id="teacherSelect" required>
+                <option value="">Select Teacher</option>
+            </select>
+            
+            <!-- Feedback Textarea -->
+            <textarea id="feedbackText" placeholder="Enter your feedback" required></textarea>
+
+            <!-- Submit Button -->
+            <button type="submit">Submit Feedback</button>
+        </form>
+    </div>
+
+    <script>
+        // Fetch teachers and populate the dropdown on page load
+        window.onload = async function() {
+            try {
+                const response = await fetch('/teachers');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch teachers');
+                }
+
+                const teachers = await response.json();
+                console.log('Teachers data:', teachers);
+
+                const teacherSelect = document.getElementById('teacherSelect');
+                teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
+
+                if (teachers.length > 0) {
+                    teachers.forEach(teacher => {
+                        const option = document.createElement('option');
+                        option.value = teacher.id;
+                        option.textContent = `${teacher.name} (${teacher.subject})`;
+                        teacherSelect.appendChild(option);
+                    });
+                } else {
+                    console.warn('No teachers found');
+                }
+            } catch (error) {
+                console.error('Error fetching teachers:', error);
+            }
+        };
+
+        // Handle form submission to store feedback
+        document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const teacher_id = document.getElementById('teacherSelect').value;
+            const feedback_text = document.getElementById('feedbackText').value;
+
+            // Ensure both teacher is selected and feedback is provided
+            if (!teacher_id || !feedback_text) {
+                alert('Please select a teacher and provide feedback.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/submit-feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ teacher_id, feedback_text, student_id: 1 }) // student_id is hardcoded here, update as necessary
+                });
+
+                if (response.ok) {
+                    alert('Feedback submitted successfully');
+                    // Clear form after submission
+                    document.getElementById('feedbackForm').reset();
+                } else {
+                    alert('Failed to submit feedback');
+                }
+            } catch (error) {
+                console.error('Error submitting feedback:', error);
+                alert('Error submitting feedback');
+            }
+        });
+    </script>
+</body>
+</html>
