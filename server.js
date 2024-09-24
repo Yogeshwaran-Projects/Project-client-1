@@ -14,7 +14,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '@YoGeSh87',
+    password: '@YoGeSh87', // Please make sure to keep your password secure
     database: 'feedback_system'
 });
 
@@ -30,7 +30,6 @@ db.connect((err) => {
 app.post('/login', (req, res) => {
     const { username, password, role } = req.body;
 
-    // Check if login is for student or teacher based on role
     if (role === 'student') {
         const query = 'SELECT * FROM students WHERE username = ? AND password = ?';
         db.query(query, [username, password], (err, results) => {
@@ -43,12 +42,13 @@ app.post('/login', (req, res) => {
             }
         });
     } else if (role === 'teacher') {
-        const query = 'SELECT * FROM teachers WHERE email = ? AND password = ?'; // Using email instead of username
+        const query = 'SELECT * FROM teachers WHERE email = ? AND password = ?';
         db.query(query, [username, password], (err, results) => {
             if (err) {
                 res.status(500).json({ success: false, message: 'Error logging in' });
             } else if (results.length > 0) {
-                res.status(200).json({ success: true, user: results[0], role: 'teacher' });
+                const teacher = results[0];
+                res.status(200).json({ success: true, user: teacher, role: 'teacher', teacherId: teacher.id });
             } else {
                 res.status(401).json({ success: false, message: 'Invalid teacher credentials' });
             }
@@ -57,7 +57,6 @@ app.post('/login', (req, res) => {
         res.status(400).json({ success: false, message: 'Invalid role' });
     }
 });
-
 
 // Fetch Teachers API
 app.get('/teachers', (req, res) => {
@@ -71,34 +70,59 @@ app.get('/teachers', (req, res) => {
     });
 });
 
-// Submit Feedback API
+// Submit Feedback API with rating for each question
 app.post('/submit-feedback', (req, res) => {
-    const { teacher_id, student_id, feedback_text } = req.body;
+    const { teacher_id, student_id, feedback_text, ratings } = req.body;
 
-    const query = 'INSERT INTO feedback (teacher_id, student_id, feedback_text) VALUES (?, ?, ?)';
-    db.query(query, [teacher_id, student_id, feedback_text], (err) => {
+    if (!teacher_id || !student_id || !feedback_text || !ratings) {
+        return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    const query = `INSERT INTO feedback (teacher_id, student_id, feedback_text, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.query(query, [
+        teacher_id, 
+        student_id, 
+        feedback_text, 
+        ratings.q1, 
+        ratings.q2, 
+        ratings.q3, 
+        ratings.q4, 
+        ratings.q5, 
+        ratings.q6, 
+        ratings.q7, 
+        ratings.q8, 
+        ratings.q9, 
+        ratings.q10
+    ], (err) => {
         if (err) {
-            res.status(500).json({ success: false, message: 'Error submitting feedback' });
-        } else {
-            res.status(200).json({ success: true, message: 'Feedback submitted successfully' });
+            console.error('Error submitting feedback:', err);  // Add detailed error logging
+            return res.status(500).json({ success: false, message: 'Error submitting feedback' });
         }
+        res.status(200).json({ success: true, message: 'Feedback submitted successfully' });
     });
 });
+
 
 // View Feedback API (For Teachers)
 app.get('/view-feedback/:teacher_id', (req, res) => {
     const teacher_id = req.params.teacher_id;
 
-    const query = 'SELECT feedback_text, created_at FROM feedback WHERE teacher_id = ?';
+    const query = `SELECT feedback_text, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, created_at 
+                   FROM feedback WHERE teacher_id = ?`;
+
     db.query(query, [teacher_id], (err, results) => {
         if (err) {
+            console.error('Error fetching feedback:', err);
             res.status(500).json({ success: false, message: 'Error fetching feedback' });
         } else {
-            res.json(results);
+            res.status(200).json(results);
         }
     });
 });
 
+// Start the server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });

@@ -12,50 +12,48 @@
         <table id="feedbackTable">
             <tr>
                 <th>Feedback</th>
+                <th>Q1</th>
+                <th>Q2</th>
+                <th>Q3</th>
+                <th>Q4</th>
+                <th>Q5</th>
+                <th>Q6</th>
+                <th>Q7</th>
+                <th>Q8</th>
+                <th>Q9</th>
+                <th>Q10</th>
                 <th>Date</th>
             </tr>
         </table>
     </div>
 
     <script>
-        // Retrieve the logged-in teacher's ID from the URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const teacherId = urlParams.get('id'); // Assuming the ID is passed as a query parameter (e.g., ?id=1)
+        const teacherId = urlParams.get('id');
 
         window.onload = async function() {
             try {
                 const response = await fetch(`/view-feedback/${teacherId}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch feedback');
-                }
-
                 const feedbackList = await response.json();
                 const feedbackTable = document.getElementById('feedbackTable');
 
-                if (feedbackList.length > 0) {
-                    feedbackList.forEach(feedback => {
-                        const row = feedbackTable.insertRow();
-                        const feedbackCell = row.insertCell(0);
-                        const dateCell = row.insertCell(1);
-
-                        feedbackCell.textContent = feedback.feedback_text;
-                        dateCell.textContent = new Date(feedback.created_at).toLocaleString();
-                    });
-                } else {
+                feedbackList.forEach(feedback => {
                     const row = feedbackTable.insertRow();
-                    const cell = row.insertCell(0);
-                    cell.colSpan = 2;
-                    cell.textContent = 'No feedback available.';
-                    cell.style.textAlign = 'center'; // Center align the message
-                }
+                    row.insertCell(0).textContent = feedback.feedback_text;
+                    row.insertCell(1).textContent = feedback.q1;
+                    row.insertCell(2).textContent = feedback.q2;
+                    row.insertCell(3).textContent = feedback.q3;
+                    row.insertCell(4).textContent = feedback.q4;
+                    row.insertCell(5).textContent = feedback.q5;
+                    row.insertCell(6).textContent = feedback.q6;
+                    row.insertCell(7).textContent = feedback.q7;
+                    row.insertCell(8).textContent = feedback.q8;
+                    row.insertCell(9).textContent = feedback.q9;
+                    row.insertCell(10).textContent = feedback.q10;
+                    row.insertCell(11).textContent = new Date(feedback.created_at).toLocaleString();
+                });
             } catch (error) {
                 console.error('Error fetching feedback:', error);
-                const feedbackTable = document.getElementById('feedbackTable');
-                const row = feedbackTable.insertRow();
-                const cell = row.insertCell(0);
-                cell.colSpan = 2;
-                cell.textContent = 'Error fetching feedback. Please try again later.';
-                cell.style.textAlign = 'center'; // Center align the error message
             }
         };
     </script>

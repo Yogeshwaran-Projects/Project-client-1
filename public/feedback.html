@@ -38,7 +38,99 @@
             <select id="teacherSelect" required>
                 <option value="">Select Teacher</option>
             </select>
-            
+
+            <!-- Rating Questions -->
+            <label for="q1">Question 1:</label>
+            <select id="q1" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+
+            <label for="q2">Question 2:</label>
+            <select id="q2" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+
+            <!-- Add more questions up to Q10 -->
+            <label for="q3">Question 3:</label>
+            <select id="q3" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+
+            <label for="q4">Question 4:</label>
+            <select id="q4" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+
+            <label for="q5">Question 5:</label>
+            <select id="q5" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+
+            <label for="q6">Question 6:</label>
+            <select id="q6" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+
+            <label for="q7">Question 7:</label>
+            <select id="q7" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+
+            <label for="q8">Question 8:</label>
+            <select id="q8" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+
+            <label for="q9">Question 9:</label>
+            <select id="q9" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+
+            <label for="q10">Question 10:</label>
+            <select id="q10" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+
             <!-- Feedback Textarea -->
             <textarea id="feedbackText" placeholder="Enter your feedback" required></textarea>
 
@@ -57,8 +149,6 @@
                 }
 
                 const teachers = await response.json();
-                console.log('Teachers data:', teachers);
-
                 const teacherSelect = document.getElementById('teacherSelect');
                 teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
 
@@ -77,38 +167,50 @@
             }
         };
 
-        // Handle form submission to store feedback
         document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const teacher_id = document.getElementById('teacherSelect').value;
-            const feedback_text = document.getElementById('feedbackText').value;
+    e.preventDefault();
+    
+    const teacher_id = document.getElementById('teacherSelect').value;
+    const feedback_text = document.getElementById('feedbackText').value;
 
-            // Ensure both teacher is selected and feedback is provided
-            if (!teacher_id || !feedback_text) {
-                alert('Please select a teacher and provide feedback.');
-                return;
-            }
+    // Replace with actual ratings inputs
+    const ratings = {
+        q1: document.getElementById('q1').value,
+        q2: document.getElementById('q2').value,
+        q3: document.getElementById('q3').value,
+        q4: document.getElementById('q4').value,
+        q5: document.getElementById('q5').value,
+        q6: document.getElementById('q6').value,
+        q7: document.getElementById('q7').value,
+        q8: document.getElementById('q8').value,
+        q9: document.getElementById('q9').value,
+        q10: document.getElementById('q10').value,
+    };
 
-            try {
-                const response = await fetch('/submit-feedback', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ teacher_id, feedback_text, student_id: 1 }) // student_id is hardcoded here, update as necessary
-                });
+    if (!teacher_id || !feedback_text) {
+        alert('Please select a teacher and provide feedback.');
+        return;
+    }
 
-                if (response.ok) {
-                    alert('Feedback submitted successfully');
-                    // Clear form after submission
-                    document.getElementById('feedbackForm').reset();
-                } else {
-                    alert('Failed to submit feedback');
-                }
-            } catch (error) {
-                console.error('Error submitting feedback:', error);
-                alert('Error submitting feedback');
-            }
+    try {
+        const response = await fetch('/submit-feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ teacher_id, feedback_text, ratings, student_id: 1 }) // Hardcoded student_id
         });
+
+        if (response.ok) {
+            alert('Feedback submitted successfully');
+            document.getElementById('feedbackForm').reset();
+        } else {
+            alert('Failed to submit feedback');
+        }
+    } catch (error) {
+        console.error('Error submitting feedback:', error);
+        alert('Error submitting feedback');
+    }
+});
+
     </script>
 </body>
 </html>

@@ -69,7 +69,7 @@
     </div>
 
     <script>
-        let isAdmin = false; // Tracks if the current login is for admin
+        let isAdmin = false; // Tracks if the current login is for admin (teacher)
 
         // Handle form submission
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
@@ -89,20 +89,21 @@
                 if (role === 'student') {
                     window.location.href = '/feedback.html';
                 } else if (role === 'teacher') {
-                    window.location.href = '/view_feedback.html';
+                    // Redirect teacher to feedback page with teacher's ID in the URL
+                    window.location.href = `/view_feedback.html?id=${data.teacherId}`;
                 }
             } else {
                 alert(data.message || 'Login failed');
             }
         });
 
-        // Toggle between student and admin login
+        // Toggle between student and teacher login
         document.getElementById('toggleRoleBtn').addEventListener('click', function(e) {
             e.preventDefault();
-            isAdmin = !isAdmin; // Toggle between admin and student
+            isAdmin = !isAdmin; // Toggle between admin (teacher) and student
 
             if (isAdmin) {
-                // Switch to admin login
+                // Switch to teacher login
                 document.getElementById('role').value = 'teacher';
                 document.getElementById('username').placeholder = 'Email';  // Change input placeholder to "Email"
                 document.getElementById('username').value = '';  // Clear the input field
