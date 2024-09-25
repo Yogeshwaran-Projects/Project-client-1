@@ -5,12 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Feedback</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .feedback-view-container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+        .feedback-view-container:hover {
+            transform: scale(1.02);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .chart-container {
+            position: relative;
+            margin: 20px 0;
+        }
+        .chart-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .feedback-evaluation {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #333;
+        }
+        .good {
+            color: green;
+        }
+        .average {
+            color: orange;
+        }
+        .bad {
+            color: red;
+        }
+        .improvement-suggestions {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .suggestion-title {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .suggestion {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #777;
+        }
+    </style>
 </head>
 <body>
     <div class="feedback-view-container">
         <h1>Your Feedback</h1>
         <table id="feedbackTable">
             <tr>
+                <th>Student ID</th> <!-- New column for Student ID -->
                 <th>Feedback</th>
                 <th>Q1</th>
                 <th>Q2</th>
@@ -25,11 +117,39 @@
                 <th>Date</th>
             </tr>
         </table>
+
+        <div class="chart-container">
+            <div class="chart-title">Feedback Ratings Overview</div>
+            <canvas id="feedbackChart" width="400" height="200"></canvas>
+        </div>
+
+        <div class="feedback-evaluation" id="feedbackEvaluation"></div>
+        
+        <div class="improvement-suggestions" id="improvementSuggestions">
+            <div class="suggestion-title">Areas for Improvement:</div>
+            <div id="suggestionsList"></div>
+        </div>
     </div>
+
+    <div class="footer">© 2024 Feedback System. All Rights Reserved.</div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const teacherId = urlParams.get('id');
+
+        // Function to generate a random student ID
+        function generateRandomStudentId() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const numbers = '0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            for (let i = 0; i < 2; i++) {
+                result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+            }
+            return result;
+        }
 
         window.onload = async function() {
             try {
@@ -37,21 +157,101 @@
                 const feedbackList = await response.json();
                 const feedbackTable = document.getElementById('feedbackTable');
 
+                const ratingsCount = Array(10).fill(0);
+                let totalRatings = 0;
+                let totalCount = 0;
+
                 feedbackList.forEach(feedback => {
                     const row = feedbackTable.insertRow();
-                    row.insertCell(0).textContent = feedback.feedback_text;
-                    row.insertCell(1).textContent = feedback.q1;
-                    row.insertCell(2).textContent = feedback.q2;
-                    row.insertCell(3).textContent = feedback.q3;
-                    row.insertCell(4).textContent = feedback.q4;
-                    row.insertCell(5).textContent = feedback.q5;
-                    row.insertCell(6).textContent = feedback.q6;
-                    row.insertCell(7).textContent = feedback.q7;
-                    row.insertCell(8).textContent = feedback.q8;
-                    row.insertCell(9).textContent = feedback.q9;
-                    row.insertCell(10).textContent = feedback.q10;
-                    row.insertCell(11).textContent = new Date(feedback.created_at).toLocaleString();
+                    row.insertCell(0).textContent = generateRandomStudentId(); // Insert Random Student ID
+                    row.insertCell(1).textContent = feedback.feedback_text;
+                    for (let i = 1; i <= 10; i++) {
+                        const rating = feedback[`q${i}`];
+                        row.insertCell(i + 1).textContent = rating; // Shift index to account for new column
+                        if (rating) {
+                            ratingsCount[rating - 1] += 1; // Count ratings
+                            totalRatings += rating;
+                            totalCount += 1;
+                        }
+                    }
+                    row.insertCell(12).textContent = new Date(feedback.created_at).toLocaleString();
                 });
+
+                // Create the chart
+                const ctx = document.getElementById('feedbackChart').getContext('2d');
+                const feedbackChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'],
+                        datasets: [{
+                            label: 'Number of Ratings',
+                            data: ratingsCount,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Ratings'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Questions'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Calculate average rating
+                const averageRating = totalCount > 0 ? (totalRatings / totalCount) : 0;
+                const feedbackEvaluation = document.getElementById('feedbackEvaluation');
+                let evaluationText = "";
+                let evaluationClass = "";
+
+                if (averageRating >= 4) {
+                    evaluationText = "Overall Feedback: Good";
+                    evaluationClass = "good";
+                } else if (averageRating >= 3) {
+                    evaluationText = "Overall Feedback: Average";
+                    evaluationClass = "average";
+                } else {
+                    evaluationText = "Overall Feedback: Bad";
+                    evaluationClass = "bad";
+                }
+
+                feedbackEvaluation.textContent = evaluationText;
+                feedbackEvaluation.className = evaluationClass;
+
+                // Provide areas for improvement
+                const suggestionsList = document.getElementById('suggestionsList');
+                const improvementSuggestions = [];
+
+                if (averageRating < 3) {
+                    improvementSuggestions.push("Consider enhancing the course materials.");
+                    improvementSuggestions.push("Increase interaction during lectures.");
+                } else if (averageRating >= 3 && averageRating < 4) {
+                    improvementSuggestions.push("Maintain consistency in teaching pace.");
+                    improvementSuggestions.push("Encourage more student participation.");
+                } else {
+                    improvementSuggestions.push("Continue the good work!");
+                    improvementSuggestions.push("Keep engaging students effectively.");
+                }
+
+                improvementSuggestions.forEach(suggestion => {
+                    const suggestionItem = document.createElement('div');
+                    suggestionItem.className = 'suggestion';
+                    suggestionItem.textContent = suggestion;
+                    suggestionsList.appendChild(suggestionItem);
+                });
+
             } catch (error) {
                 console.error('Error fetching feedback:', error);
             }

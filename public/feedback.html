@@ -1,216 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Feedback</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teacher Feedback</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 50px;
-        }
-        .feedback-container {
-            max-width: 400px;
-            margin: auto;
-        }
-        select, textarea, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 16px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 50px;
+        background-color: #000000;
+      }
+      .highlight {
+        color: rgb(244, 241, 241);
+        padding: 5px;
+        border-radius: 5px;
+      }
+
+      .teacher-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 20px;
+      }
+
+      .teacher-card {
+        background-color: rgb(64, 177, 248);
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .teacher-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .teacher-card h2 {
+        margin: 10px 0;
+        color: #040505;
+      }
+
+      .teacher-card p {
+        color: #070606;
+        font-size: 14px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 10px;
+        max-width: 500px;
+      }
+
+      select,
+      textarea,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        font-size: 16px;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      label {
+        margin-top: 10px;
+        display: block;
+        font-size: 14px;
+      }
     </style>
-</head>
-<body>
-    <div class="feedback-container">
-        <h1>Submit Feedback</h1>
+  </head>
+  <body>
+    <h1 class="highlight">Teacher Feedback</h1>
+
+    <!-- Teacher Cards Container -->
+    <div class="teacher-grid" id="teacherGrid">
+      <!-- Cards will be dynamically populated here -->
+    </div>
+
+    <!-- Modal for Feedback Form -->
+    <div id="feedbackModal" class="modal">
+      <div class="modal-content">
+        <h2 id="selectedTeacherName">Submit Feedback</h2>
         <form id="feedbackForm">
-            <!-- Teacher Selection Dropdown -->
-            <select id="teacherSelect" required>
-                <option value="">Select Teacher</option>
-            </select>
+            <input type="hidden" id="teacherId" required />
 
-            <!-- Rating Questions -->
-            <label for="q1">Question 1:</label>
-            <select id="q1" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
+          <!-- Rating Questions -->
+          <label for="q1">Question 1: Subject Knowledge of the Teacher?</label>
+          <select id="q1" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
 
-            <label for="q2">Question 2:</label>
-            <select id="q2" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
+          <label for="q2"
+            >Question 2: Adequacy of the Teaching Methodology?</label
+          >
+          <select id="q2" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
 
-            <!-- Add more questions up to Q10 -->
-            <label for="q3">Question 3:</label>
-            <select id="q3" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
+          <!-- Repeat for q3 to q10 -->
+          <label for="q3">Question 3: Responsiveness to Student Queries?</label>
+          <select id="q3" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
 
-            <label for="q4">Question 4:</label>
-            <select id="q4" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
+          <label for="q4"
+            >Question 4: Adequate coverage of course content?</label
+          >
+          <select id="q4" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
 
-            <label for="q5">Question 5:</label>
-            <select id="q5" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
+          <label for="q5">Question 5: Regularity and Punctuality?</label>
+          <select id="q5" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
 
-            <label for="q6">Question 6:</label>
-            <select id="q6" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
+          <label for="q6">Question 6: Discussion in the Class room?</label>
+          <select id="q6" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
 
-            <label for="q7">Question 7:</label>
-            <select id="q7" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
+          <label for="q7"
+            >Question 7: Effectiveness delivery of lectures?</label
+          >
+          <select id="q7" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
 
-            <label for="q8">Question 8:</label>
-            <select id="q8" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
+          <label for="q8"
+            >Question 8: Transparency and fairness in evaluation?</label
+          >
+          <select id="q8" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
 
-            <label for="q9">Question 9:</label>
-            <select id="q9" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
+          <label for="q9">Question 9: Completion of Syllabus in time?</label>
+          <select id="q9" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
 
-            <label for="q10">Question 10:</label>
-            <select id="q10" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
+          <label for="q10">Question 10: Motivation and Counseling?</label>
+          <select id="q10" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
 
-            <!-- Feedback Textarea -->
-            <textarea id="feedbackText" placeholder="Enter your feedback" required></textarea>
+          <label for="feedbackText">Additional Feedback:</label>
+          <textarea
+            id="feedbackText"
+            placeholder="Enter your feedback"
+            required
+          ></textarea>
 
-            <!-- Submit Button -->
-            <button type="submit">Submit Feedback</button>
+          <button type="submit">Submit Feedback</button>
         </form>
+      </div>
     </div>
 
     <script>
-        // Fetch teachers and populate the dropdown on page load
-        window.onload = async function() {
-            try {
-                const response = await fetch('/teachers');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch teachers');
-                }
-
-                const teachers = await response.json();
-                const teacherSelect = document.getElementById('teacherSelect');
-                teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
-
-                if (teachers.length > 0) {
-                    teachers.forEach(teacher => {
-                        const option = document.createElement('option');
-                        option.value = teacher.id;
-                        option.textContent = `${teacher.name} (${teacher.subject})`;
-                        teacherSelect.appendChild(option);
-                    });
-                } else {
-                    console.warn('No teachers found');
-                }
-            } catch (error) {
-                console.error('Error fetching teachers:', error);
-            }
-        };
-
-        document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const teacher_id = document.getElementById('teacherSelect').value;
-    const feedback_text = document.getElementById('feedbackText').value;
-
-    // Replace with actual ratings inputs
-    const ratings = {
-        q1: document.getElementById('q1').value,
-        q2: document.getElementById('q2').value,
-        q3: document.getElementById('q3').value,
-        q4: document.getElementById('q4').value,
-        q5: document.getElementById('q5').value,
-        q6: document.getElementById('q6').value,
-        q7: document.getElementById('q7').value,
-        q8: document.getElementById('q8').value,
-        q9: document.getElementById('q9').value,
-        q10: document.getElementById('q10').value,
-    };
-
-    if (!teacher_id || !feedback_text) {
-        alert('Please select a teacher and provide feedback.');
-        return;
-    }
-
-    try {
-        const response = await fetch('/submit-feedback', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ teacher_id, feedback_text, ratings, student_id: 1 }) // Hardcoded student_id
+        document.addEventListener("DOMContentLoaded", async () => {
+          try {
+            const response = await fetch("/teachers");
+            if (!response.ok) throw new Error("Failed to fetch teachers");
+            const teachers = await response.json();
+            populateTeacherCards(teachers);
+          } catch (error) {
+            console.error("Error:", error);
+          }
         });
-
-        if (response.ok) {
-            alert('Feedback submitted successfully');
-            document.getElementById('feedbackForm').reset();
-        } else {
-            alert('Failed to submit feedback');
+  
+        function populateTeacherCards(teachers) {
+          const teacherGrid = document.getElementById("teacherGrid");
+          teachers.forEach((teacher) => {
+            const card = document.createElement("div");
+            card.classList.add("teacher-card");
+            card.innerHTML = `
+              <h2>${teacher.name}</h2>
+              <p>Subject: ${teacher.subject}</p>
+              <p>Semester: ${teacher.Semester}</p>
+              <p>Subject Code: ${teacher.Subject_Code}</p>
+              <p>Staff ID: ${teacher.Staff_Id}</p>
+            `;
+            card.onclick = () => openFeedbackForm(teacher.id, teacher.name);
+            teacherGrid.appendChild(card);
+          });
         }
-    } catch (error) {
-        console.error('Error submitting feedback:', error);
-        alert('Error submitting feedback');
-    }
-});
-
-    </script>
-</body>
+  
+        function openFeedbackForm(teacherId, teacherName) {
+          document.getElementById("teacherId").value = teacherId;
+          document.getElementById("selectedTeacherName").innerText = `Submit Feedback for ${teacherName}`;
+          document.getElementById("feedbackModal").style.display = "block";
+        }
+  
+        function generateRandomStudentId() {
+          const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          const numbers = "0123456789";
+          let result = "";
+          for (let i = 0; i < 6; i++) {
+            result += letters.charAt(Math.floor(Math.random() * letters.length));
+          }
+          for (let i = 0; i < 2; i++) {
+            result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+          }
+          return result;
+        }
+  
+        document.getElementById("feedbackForm").addEventListener("submit", async function (event) {
+          event.preventDefault();
+  
+          const teacher_id = document.getElementById("teacherId").value;
+          const feedback_text = document.getElementById("feedbackText").value;
+  
+          if (!teacher_id) {
+            alert("Teacher ID is missing");
+            return;
+          }
+  
+          const student_id = generateRandomStudentId();
+          const ratings = {
+            q1: document.getElementById("q1").value,
+            q2: document.getElementById("q2").value,
+            q3: document.getElementById("q3").value,
+            q4: document.getElementById("q4").value,
+            q5: document.getElementById("q5").value,
+            q6: document.getElementById("q6").value,
+            q7: document.getElementById("q7").value,
+            q8: document.getElementById("q8").value,
+            q9: document.getElementById("q9").value,
+            q10: document.getElementById("q10").value,
+          };
+  
+          const feedbackData = {
+            teacher_id,
+            student_id,
+            feedback_text,
+            ratings,
+          };
+  
+          try {
+            const response = await fetch("/submit-feedback", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(feedbackData),
+            });
+  
+            if (!response.ok) throw new Error("Failed to submit feedback");
+            alert("Feedback submitted successfully");
+            document.getElementById("feedbackModal").style.display = "none";
+            document.getElementById("feedbackForm").reset();
+          } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred while submitting feedback");
+          }
+        });
+  
+        window.onclick = function (event) {
+          const modal = document.getElementById("feedbackModal");
+          if (event.target == modal) {
+            modal.style.display = "none";
+            document.getElementById("feedbackForm").reset();
+          }
+        };
+      </script>
+  </body>
 </html>

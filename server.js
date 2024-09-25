@@ -109,7 +109,7 @@ app.post('/submit-feedback', (req, res) => {
 app.get('/view-feedback/:teacher_id', (req, res) => {
     const teacher_id = req.params.teacher_id;
 
-    const query = `SELECT feedback_text, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, created_at 
+    const query = `SELECT feedback_text, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, created_at, student_id 
                    FROM feedback WHERE teacher_id = ?`;
 
     db.query(query, [teacher_id], (err, results) => {
@@ -121,6 +121,7 @@ app.get('/view-feedback/:teacher_id', (req, res) => {
         }
     });
 });
+
 
 // Start the server
 app.listen(port, () => {

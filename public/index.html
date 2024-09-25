@@ -1,121 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login | Feedback System</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .login-container {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            text-align: center;
-        }
-        h1 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            border: none;
-            color: white;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #toggleRoleBtn {
-            margin-top: 20px;
-            background-color: #28a745;
-        }
-        #toggleRoleBtn:hover {
-            background-color: #218838;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #121212;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .container {
+        perspective: 1000px; /* Adds perspective for 3D rotation */
+      }
+
+      .login-container {
+        background: linear-gradient(145deg, #ffffff, #f0f0f0);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        width: 350px;
+        text-align: center;
+        position: relative; /* Ensure parent has a relative position */
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+        height: 400px; /* Ensure consistent height for both forms */
+      }
+
+      .login-container.flipped {
+        transform: rotateY(180deg);
+      }
+
+      .form-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; 
+        align-items: center; 
+        position: absolute; 
+        backface-visibility: hidden;
+        height: 100%;
+        top: 0; 
+        left: 0; 
+      }
+
+      .front {
+        z-index: 2;
+      }
+
+      .back {
+        transform: rotateY(180deg);
+      }
+
+      h1 {
+        margin-bottom: 20px;
+        color: #333;
+        font-size: 24px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      input {
+        width: 80%; /* Keeps input width consistent */
+        padding: 12px 15px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+      }
+
+      button {
+        width: 80%; /* Keeps button width consistent */
+        padding: 12px;
+        background: linear-gradient(145deg, #007bff, #0056b3);
+        border: none;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        background: linear-gradient(145deg, #0056b3, #003e8c);
+      }
+
+      #toggleRoleBtn,
+      #toggleRoleBtnBack {
+        margin-top: 20px;
+        background: linear-gradient(145deg, #28a745, #218838);
+      }
+
+      #toggleRoleBtn:hover,
+      #toggleRoleBtnBack:hover {
+        margin-top: 20px;
+        background: linear-gradient(145deg, #218838, #1e7e34);
+      }
+
+      .login-container::after {
+        content: "";
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        bottom: -10px;
+        left: -10px;
+        border-radius: 15px;
+        z-index: -1;
+        background: linear-gradient(145deg, #007bff, #28a745);
+        opacity: 0.3;
+        filter: blur(20px);
+      }
     </style>
-</head>
-<body>
-    <div class="login-container">
-        <h1>Login</h1>
-        <form id="loginForm">
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <input type="hidden" id="role" value="student">
+  </head>
+  <body>
+    <div class="container">
+      <div class="login-container" id="loginContainer">
+        <!-- Front (Student Login) -->
+        <div class="form-container front">
+          <h1>Student Login</h1>
+          <form id="loginFormStudent">
+            <input type="text" id="username" placeholder="Username" required />
+            <input
+              type="password"
+              id="password"
+              placeholder="Password"
+              required
+            />
+            <input type="hidden" id="role" value="student" />
             <button type="submit">Login</button>
-        </form>
-        <button id="toggleRoleBtn">Login as Admin</button>
+          </form>
+          <button id="toggleRoleBtn">Login as Admin</button>
+        </div>
+        <!-- Back (Admin Login) -->
+        <div class="form-container back">
+          <h1>Admin Login</h1>
+          <form id="loginFormAdmin">
+            <input type="text" id="adminEmail" placeholder="Email" required />
+            <input
+              type="password"
+              id="adminPassword"
+              placeholder="Password"
+              required
+            />
+            <input type="hidden" id="role" value="teacher" />
+            <button type="submit">Login</button>
+          </form>
+          <button id="toggleRoleBtnBack">Login as Student</button>
+        </div>
+      </div>
     </div>
 
     <script>
-        let isAdmin = false; // Tracks if the current login is for admin (teacher)
-
-        // Handle form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
-
-            const response = await fetch('/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, role })
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                if (role === 'student') {
-                    window.location.href = '/feedback.html';
-                } else if (role === 'teacher') {
-                    // Redirect teacher to feedback page with teacher's ID in the URL
-                    window.location.href = `/view_feedback.html?id=${data.teacherId}`;
+        // Handle form submission for student login
+        document
+            .getElementById("loginFormStudent")
+            .addEventListener("submit", async function (e) {
+                e.preventDefault();
+                const username = document.getElementById("username").value;
+                const password = document.getElementById("password").value;
+    
+                const response = await fetch("/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password, role: "student" }),
+                });
+    
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = "/feedback.html";
+                } else {
+                    alert(data.message || "Login failed");
                 }
-            } else {
-                alert(data.message || 'Login failed');
-            }
-        });
-
-        // Toggle between student and teacher login
-        document.getElementById('toggleRoleBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            isAdmin = !isAdmin; // Toggle between admin (teacher) and student
-
-            if (isAdmin) {
-                // Switch to teacher login
-                document.getElementById('role').value = 'teacher';
-                document.getElementById('username').placeholder = 'Email';  // Change input placeholder to "Email"
-                document.getElementById('username').value = '';  // Clear the input field
-                document.getElementById('toggleRoleBtn').textContent = 'Login as Student';  // Update button text
-            } else {
-                // Switch back to student login
-                document.getElementById('role').value = 'student';
-                document.getElementById('username').placeholder = 'Username';  // Change input placeholder to "Username"
-                document.getElementById('username').value = '';  // Clear the input field
-                document.getElementById('toggleRoleBtn').textContent = 'Login as Admin';  // Update button text
-            }
-        });
+            });
+    
+        // Handle form submission for admin login
+        document
+            .getElementById("loginFormAdmin")
+            .addEventListener("submit", async function (e) {
+                e.preventDefault();
+                const email = document.getElementById("adminEmail").value;
+                const password = document.getElementById("adminPassword").value;
+    
+                const response = await fetch("/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: email, password, role: "teacher" }), // Change this to match your server-side expectation
+                });
+    
+                const data = await response.json();
+                if (data.success) {
+                    // Ensure teacherId is part of the response
+                    if (data.teacherId) {
+                        window.location.href = `/view_feedback.html?id=${data.teacherId}`;
+                    } else {
+                        alert("Teacher ID not found.");
+                    }
+                } else {
+                    alert(data.message || "Login failed");
+                }
+            });
+    
+        // Toggle between student and admin login with card flip
+        document
+            .getElementById("toggleRoleBtn")
+            .addEventListener("click", function (e) {
+                e.preventDefault();
+                document.getElementById("loginContainer").classList.add("flipped");
+            });
+    
+        document
+            .getElementById("toggleRoleBtnBack")
+            .addEventListener("click", function (e) {
+                e.preventDefault();
+                document.getElementById("loginContainer").classList.remove("flipped");
+            });
     </script>
-</body>
+    
+  </body>
 </html>
