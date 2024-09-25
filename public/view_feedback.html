@@ -48,6 +48,25 @@
         tr:hover {
             background-color: #f1f1f1;
         }
+        .tooltip {
+            position: relative;
+            cursor: pointer;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            white-space: nowrap;
+            font-size: 12px;
+        }
         .chart-container {
             position: relative;
             margin: 20px 0;
@@ -95,6 +114,39 @@
             margin-top: 40px;
             color: #777;
         }
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -102,18 +154,18 @@
         <h1>Your Feedback</h1>
         <table id="feedbackTable">
             <tr>
-                <th>Student ID</th> <!-- New column for Student ID -->
+                <th>Student ID</th>
                 <th>Feedback</th>
-                <th>Q1</th>
-                <th>Q2</th>
-                <th>Q3</th>
-                <th>Q4</th>
-                <th>Q5</th>
-                <th>Q6</th>
-                <th>Q7</th>
-                <th>Q8</th>
-                <th>Q9</th>
-                <th>Q10</th>
+                <th>Q1 <span class="tooltip" data-tooltip="How would you rate the overall content quality?">?</span></th>
+                <th>Q2 <span class="tooltip" data-tooltip="How effective was the teacher's explanation?">?</span></th>
+                <th>Q3 <span class="tooltip" data-tooltip="How engaging was the lecture?">?</span></th>
+                <th>Q4 <span class="tooltip" data-tooltip="How was the course pace?">?</span></th>
+                <th>Q5 <span class="tooltip" data-tooltip="Was the material understandable?">?</span></th>
+                <th>Q6 <span class="tooltip" data-tooltip="How would you rate the teacher's availability?">?</span></th>
+                <th>Q7 <span class="tooltip" data-tooltip="How was the teacher's attitude?">?</span></th>
+                <th>Q8 <span class="tooltip" data-tooltip="Was the assessment fair?">?</span></th>
+                <th>Q9 <span class="tooltip" data-tooltip="Was the feedback helpful?">?</span></th>
+                <th>Q10 <span class="tooltip" data-tooltip="Would you recommend this course?">?</span></th>
                 <th>Date</th>
             </tr>
         </table>
@@ -124,7 +176,7 @@
         </div>
 
         <div class="feedback-evaluation" id="feedbackEvaluation"></div>
-        
+
         <div class="improvement-suggestions" id="improvementSuggestions">
             <div class="suggestion-title">Areas for Improvement:</div>
             <div id="suggestionsList"></div>
@@ -132,6 +184,15 @@
     </div>
 
     <div class="footer">© 2024 Feedback System. All Rights Reserved.</div>
+
+    <!-- Modal for viewing detailed questions -->
+    <div id="feedbackModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Detailed Feedback</h2>
+            <div id="modalContent"></div>
+        </div>
+    </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -156,6 +217,9 @@
                 const response = await fetch(`/view-feedback/${teacherId}`);
                 const feedbackList = await response.json();
                 const feedbackTable = document.getElementById('feedbackTable');
+                const modal = document.getElementById('feedbackModal');
+                const modalContent = document.getElementById('modalContent');
+                const span = document.getElementsByClassName('close')[0];
 
                 const ratingsCount = Array(10).fill(0);
                 let totalRatings = 0;
@@ -165,9 +229,11 @@
                     const row = feedbackTable.insertRow();
                     row.insertCell(0).textContent = generateRandomStudentId(); // Insert Random Student ID
                     row.insertCell(1).textContent = feedback.feedback_text;
+
                     for (let i = 1; i <= 10; i++) {
                         const rating = feedback[`q${i}`];
-                        row.insertCell(i + 1).textContent = rating; // Shift index to account for new column
+                        row.insertCell(i + 1).textContent = rating;
+
                         if (rating) {
                             ratingsCount[rating - 1] += 1; // Count ratings
                             totalRatings += rating;
@@ -175,16 +241,66 @@
                         }
                     }
                     row.insertCell(12).textContent = new Date(feedback.created_at).toLocaleString();
+
+                    // Modal for detailed questions and ratings
+                    row.onclick = function() {
+                        let content = `
+                            <p><strong>Q1:</strong> How would you rate the overall content quality? - ${feedback.q1}</p>
+                            <p><strong>Q2:</strong> How effective was the teacher's explanation? - ${feedback.q2}</p>
+                            <p><strong>Q3:</strong> How engaging was the lecture? - ${feedback.q3}</p>
+                            <p><strong>Q4:</strong> How was the course pace? - ${feedback.q4}</p>
+                            <p><strong>Q5:</strong> Was the material understandable? - ${feedback.q5}</p>
+                            <p><strong>Q6:</strong> How would you rate the teacher's availability? - ${feedback.q6}</p>
+                            <p><strong>Q7:</strong> How was the teacher's attitude? - ${feedback.q7}</p>
+                            <p><strong>Q8:</strong> Was the assessment fair? - ${feedback.q8}</p>
+                            <p><strong>Q9:</strong> Was the feedback helpful? - ${feedback.q9}</p>
+                            <p><strong>Q10:</strong> Would you recommend this course? - ${feedback.q10}</p>
+                        `;
+                        modalContent.innerHTML = content;
+                        modal.style.display = "block";
+                    };
                 });
 
-                // Create the chart
+                // Close the modal
+                span.onclick = function() {
+                    modal.style.display = "none";
+                };
+
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                };
+
+                // Calculate feedback average rating
+                const averageRating = (totalRatings / totalCount).toFixed(1);
+                const feedbackEvaluation = document.getElementById('feedbackEvaluation');
+                if (averageRating >= 4) {
+                    feedbackEvaluation.textContent = `Overall Rating: ${averageRating} (Good)`;
+                    feedbackEvaluation.classList.add('good');
+                } else if (averageRating >= 3) {
+                    feedbackEvaluation.textContent = `Overall Rating: ${averageRating} (Average)`;
+                    feedbackEvaluation.classList.add('average');
+                } else {
+                    feedbackEvaluation.textContent = `Overall Rating: ${averageRating} (Needs Improvement)`;
+                    feedbackEvaluation.classList.add('bad');
+                }
+
+                // Improvement suggestions
+                const suggestionsList = document.getElementById('suggestionsList');
+                suggestionsList.innerHTML = feedbackList
+                    .filter(f => f.q1 <= 3 || f.q2 <= 3) // Example: Filter for low ratings
+                    .map(f => `<div class="suggestion">Suggestion from feedback ${generateRandomStudentId()} - Improve explanation or content quality.</div>`)
+                    .join('');
+                
+                // Chart.js for Feedback Ratings Overview
                 const ctx = document.getElementById('feedbackChart').getContext('2d');
-                const feedbackChart = new Chart(ctx, {
+                const chart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10'],
+                        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
                         datasets: [{
-                            label: 'Number of Ratings',
+                            label: '# of Ratings',
                             data: ratingsCount,
                             backgroundColor: 'rgba(75, 192, 192, 0.6)',
                             borderColor: 'rgba(75, 192, 192, 1)',
@@ -194,66 +310,13 @@
                     options: {
                         scales: {
                             y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Number of Ratings'
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Questions'
-                                }
+                                beginAtZero: true
                             }
                         }
                     }
                 });
-
-                // Calculate average rating
-                const averageRating = totalCount > 0 ? (totalRatings / totalCount) : 0;
-                const feedbackEvaluation = document.getElementById('feedbackEvaluation');
-                let evaluationText = "";
-                let evaluationClass = "";
-
-                if (averageRating >= 4) {
-                    evaluationText = "Overall Feedback: Good";
-                    evaluationClass = "good";
-                } else if (averageRating >= 3) {
-                    evaluationText = "Overall Feedback: Average";
-                    evaluationClass = "average";
-                } else {
-                    evaluationText = "Overall Feedback: Bad";
-                    evaluationClass = "bad";
-                }
-
-                feedbackEvaluation.textContent = evaluationText;
-                feedbackEvaluation.className = evaluationClass;
-
-                // Provide areas for improvement
-                const suggestionsList = document.getElementById('suggestionsList');
-                const improvementSuggestions = [];
-
-                if (averageRating < 3) {
-                    improvementSuggestions.push("Consider enhancing the course materials.");
-                    improvementSuggestions.push("Increase interaction during lectures.");
-                } else if (averageRating >= 3 && averageRating < 4) {
-                    improvementSuggestions.push("Maintain consistency in teaching pace.");
-                    improvementSuggestions.push("Encourage more student participation.");
-                } else {
-                    improvementSuggestions.push("Continue the good work!");
-                    improvementSuggestions.push("Keep engaging students effectively.");
-                }
-
-                improvementSuggestions.forEach(suggestion => {
-                    const suggestionItem = document.createElement('div');
-                    suggestionItem.className = 'suggestion';
-                    suggestionItem.textContent = suggestion;
-                    suggestionsList.appendChild(suggestionItem);
-                });
-
             } catch (error) {
-                console.error('Error fetching feedback:', error);
+                console.error('Error loading feedback:', error);
             }
         };
     </script>
